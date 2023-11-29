@@ -10,3 +10,6 @@ data = pd.read_csv('/Users/hyejeongchoi/Desktop/hchoi_homepage/hchoi2/Python/Dat
 X = data.iloc[:, 0:11]
 y = data.iloc[:, 11] 
 print(y.head())
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
