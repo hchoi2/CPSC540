@@ -1,11 +1,13 @@
 import lightgbm as lgb
 from sklearn.model_selection import GridSearchCV, train_test_split
 import pandas as pd
+from sklearn.preprocessing import normalize
 from sklearn.metrics import accuracy_score, classification_report
 
 # Load data
-data = pd.read_csv('./Data/WineQT.csv')
+data = pd.read_csv('WineQT.csv')
 X = data.iloc[:, 0:11]
+X=normalize(X, axis= 0)
 y = data.iloc[:, 11] 
 print(y.head())
 
