@@ -4,6 +4,7 @@ from sklearn.ensemble import AdaBoostClassifier as abc
 import pandas as pd
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import accuracy_score, classification_report
+# from class sklearn.preprocessing import LabelEncoder
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -28,11 +29,15 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Define the parameter grid to search
 param_grid = {
-    'max_depth': [4, 6]
+    'max_depth': [4, 6],
+    'learning_rate': [0.01, 0.1, 1],
+    'lambda in regularization': [0.01, 0.1, 1],
+    'number of trees': [100, 200]
+
 }
 
 # Create the CatBoost model
-cbr_model = cbr(verbose=0, classes_count=9, objective='MultiClass')
+cbr_model = cbr(verbose=0, objective='MultiClass')
 
 # Use GridSearchCV to find the best hyperparameters
 grid_search = GridSearchCV(estimator=cbr_model, param_grid=param_grid, scoring='accuracy', cv=5)
@@ -42,7 +47,7 @@ grid_search.fit(X_train, y_train)
 print("Best Hyperparameters:", grid_search.best_params_)
 
 # Train a new model with the best hyperparameters
-best_model = cbr(**grid_search.best_params_, verbose=0, classes_count=9, objective='multiclass')
+best_model = cbr(**grid_search.best_params_, verbose=0, objective='MultiClass')
 best_model.fit(X_train, y_train)
 best_model.get_params()
 # Make predictions on the test set
