@@ -5,7 +5,7 @@ from sklearn.preprocessing import normalize
 from sklearn.metrics import accuracy_score, classification_report
 
 # Load data
-data = pd.read_csv('D:\tutorial\UBC\Machine \Learning\project\hchoi2\Python\Data\WineQT.csv')
+data = pd.read_csv('./Python/Data/WineQT.csv')
 X = data.iloc[:, 0:11]
 X=normalize(X, axis= 0)
 y = data.iloc[:, 11] 
