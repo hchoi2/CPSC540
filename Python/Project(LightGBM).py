@@ -5,14 +5,14 @@ from sklearn.preprocessing import normalize
 from sklearn.metrics import accuracy_score, classification_report
 
 from imblearn.over_sampling import SMOTE
-sm = SMOTE(sampling_strategy='auto', random_state=42)
+#sm = SMOTE(sampling_strategy='auto', random_state=42)
 
 
 # Load data
 #data = pd.read_csv('./Python/Data/WineQT.csv')
 data = pd.read_csv('./Data/WineQT.csv')
 X = data.iloc[:, 0:11]
-X=normalize(X, axis= 0)
+#X=normalize(X, axis= 0)
 y = data.iloc[:, 11] 
 print(y.head())
 
@@ -28,25 +28,22 @@ train_data = lgb.Dataset(X_train, label=y_train)
 
 # Define the parameter grid to search
 param_grid = {
-    'max_depth': [-1, 2, 4, 8],
-    'learning_rate': [0.05, 0.1, 0.2, 0.5],  # Boosting learning rate.
-    'lambda_1': [0.01 ,0.1, 0.5],
-    'n_stimators': [100,150,200],
-
+    'learning_rate': [0.05],  # Boosting learning rate.
+    'num_leaves': [5,10, 20, 30,50],
 }
 
 # Create the LightGBM model
-lgb_model = lgb.LGBMClassifier(verbose=-1,num_classes=6, objective='multiclass',)
+lgb_model = lgb.LGBMClassifier(verbose=-1, objective='multiclass',)
 
 # Use GridSearchCV to find the best hyperparameters
-grid_search = GridSearchCV(estimator=lgb_model, param_grid=param_grid, scoring='accuracy', cv=5)
+grid_search = GridSearchCV(estimator=lgb_model, param_grid=param_grid, scoring='accuracy', cv=6, verbose=3)
 grid_search.fit(X_train, y_train)
 
 # Print the best hyperparameters
 print("Best Hyperparameters:", grid_search.best_params_)
 
 # Train a new model with the best hyperparameters
-best_model = lgb.LGBMClassifier(**grid_search.best_params_,verbose=-1, num_classes=6, objective='multiclass')
+best_model = lgb.LGBMClassifier(**grid_search.best_params_,verbose=-1, objective='multiclass')
 best_model.fit(X_train, y_train)
 best_model.get_params()
 # Make predictions on the test set
