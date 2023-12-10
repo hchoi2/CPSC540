@@ -4,15 +4,24 @@ import pandas as pd
 from sklearn.preprocessing import normalize
 from sklearn.metrics import accuracy_score, classification_report
 
+from imblearn.over_sampling import SMOTE
+sm = SMOTE(sampling_strategy='auto', random_state=42)
+
+
 # Load data
 data = pd.read_csv('./Python/Data/WineQT.csv')
+data = pd.read_csv('./Data/WineQT.csv')
 X = data.iloc[:, 0:11]
 X=normalize(X, axis= 0)
 y = data.iloc[:, 11] 
 print(y.head())
 
+#X,y=sm.fit_resample(X,y) --- 84% but it's not real.
+
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+#X_train,y_train=sm.fit_resample(X_train,y_train) --- 62 % accuracy, it's worse
 
 # Convert the data to LightGBM dataset format
 train_data = lgb.Dataset(X_train, label=y_train)
