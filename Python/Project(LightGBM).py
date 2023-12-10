@@ -3,6 +3,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 import pandas as pd
 from sklearn.preprocessing import normalize
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn import metrics
 
 from imblearn.over_sampling import SMOTE
 #sm = SMOTE(sampling_strategy='auto', random_state=42)
@@ -19,7 +20,7 @@ print(y.head())
 #X,y=sm.fit_resample(X,y) --- 84% but it's not real.
 
 # Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=30)
 
 #X_train,y_train=sm.fit_resample(X_train,y_train) --- 62 % accuracy, it's worse
 
@@ -28,19 +29,22 @@ train_data = lgb.Dataset(X_train, label=y_train)
 
 # Define the parameter grid to search
 param_grid = {
-    'learning_rate': [0.05],  # Boosting learning rate.
-    'num_leaves': [5,10, 20, 30,50],
+    'learning_rate': [0.01],  # Boosting learning rate.
+    'num_leaves': [10,20,30,40,50],
 }
 
 # Create the LightGBM model
-lgb_model = lgb.LGBMClassifier(verbose=-1, objective='multiclass',)
+lgb_model = lgb.LGBMClassifier(verbose=-1, objective='multiclass')
 
 # Use GridSearchCV to find the best hyperparameters
-grid_search = GridSearchCV(estimator=lgb_model, param_grid=param_grid, scoring='accuracy', cv=6, verbose=3)
+grid_search = GridSearchCV(estimator=lgb_model, param_grid=param_grid, scoring='accuracy', cv=5, verbose=3)
 grid_search.fit(X_train, y_train)
 
 # Print the best hyperparameters
 print("Best Hyperparameters:", grid_search.best_params_)
+# Get the average cross-validation score for the best parameters
+best_score = grid_search.best_score_
+print(f'Average Cross-Validation Score: {best_score}')
 
 # Train a new model with the best hyperparameters
 best_model = lgb.LGBMClassifier(**grid_search.best_params_,verbose=-1, objective='multiclass')
@@ -56,3 +60,4 @@ test_accuracy = accuracy_score(y_test, y_pred)
 train_accuracy = accuracy_score(y_train, y_pred_train)
 print(f'Test Accuracy with best hyperparameters: {test_accuracy}')
 print(f'Training Accuracy with best hyperparameters: {train_accuracy}')
+print('Validation Score -> ', metrics.cohen_kappa_score(y_pred, y_test, weights='quadratic'))
