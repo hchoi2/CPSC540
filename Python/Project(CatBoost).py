@@ -39,10 +39,14 @@ X_test_scaled = scaler.transform(X_test)  # Note: we transform the test set with
 param_grid = {
     # 'grow_policy': 'Lossguide', 
     # 'num_leaves': [20, 40, 60, 80, 100],
-    'iterations': [50, 100, 200, 300], # num_trees
-    'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.2],
-    'max_depth': [4, 6, 8, 10, 12],
-    'l2_leaf_reg': [0.001, 0.01, 0.1, 1, 10]
+    # 'iterations': [50, 100, 200, 300], # num_trees
+    # 'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.2],
+    # 'max_depth': [4, 6, 8, 10, 12],
+    # 'l2_leaf_reg': [0.001, 0.01, 0.1, 1, 10]
+    'iterations': [100, 300], # num_trees
+    'learning_rate': [0.1, 0.2],
+    'max_depth': [8, 12],
+    'l2_leaf_reg': [0.001, 0.01]
 
 }
 
@@ -51,7 +55,7 @@ param_grid = {
 cbr_model = cbr(verbose=0, objective='MultiClass')
 
 # Use GridSearchCV to find the best hyperparameters
-grid_search = GridSearchCV(estimator=cbr_model, param_grid=param_grid, scoring='accuracy', cv=5, verbose=3)
+grid_search = GridSearchCV(estimator=cbr_model, param_grid=param_grid, scoring='accuracy', cv=3, verbose=3)
 grid_search.fit(X_train_scaled, y_train)
 
 # Print the best hyperparameters
@@ -96,3 +100,18 @@ plt.close()
 explainer = shap.TreeExplainer(best_model)
 shap_values = explainer.shap_values(X_train_scaled)
 shap.summary_plot(shap_values, X_train_scaled, feature_names=X.columns)
+
+# Extract the evaluation history
+eval_history = best_model.evals_result_
+
+# Plot the learning curves
+plt.figure(figsize=(10, 6))
+plt.plot(eval_history['learn']['MultiClass'], label='Training loss')
+plt.plot(eval_history['validation']['MultiClass'], label='Validation loss')
+plt.title('Learning Curve')
+plt.xlabel('Iterations')
+plt.ylabel('MultiClass Loss')
+plt.legend()
+plt.show()
+plt.savefig('learning_curve.png')
+plt.close()
