@@ -89,6 +89,8 @@ plt.bar(range(len(feature_importances)), feature_importances)
 plt.xticks(range(len(feature_importances)), X.columns, rotation=90)
 plt.title('Feature Importances')
 plt.show()
+plt.savefig('feature_importances.png')
+plt.close()
 
 # Model Interpretability (SHAP Values)
 explainer = shap.TreeExplainer(best_model)
