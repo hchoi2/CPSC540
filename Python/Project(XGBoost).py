@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, classification_report
 import xgboost as xgb
+from sklearn.model_selection import learning_curve
 
 # Load data
 data = pd.read_csv('./python/WineQT.csv')
@@ -26,7 +27,7 @@ param_grid = {
 }
 
 # Create the LightGBM model
-xgb_model = xgb.XGBClassifier(objective='multi:softmax')
+xgb_model = xgb.XGBClassifier(objective='multi:softmax', subsample=0.5)
 
 # Use GridSearchCV to find the best hyperparameters
 grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, scoring='accuracy', cv=5, verbose=3)
@@ -38,8 +39,17 @@ print(f'Average Cross-Validation Score: {best_score}')
 print("Best Hyperparameters:", grid_search.best_params_)
 
 # Train a new model with the best hyperparameters
-best_model = xgb.XGBClassifier(**grid_search.best_params_,verbose=-1, objective='multi:softmax')
-best_model.fit(X_train, y_train)
+best_model = xgb.XGBClassifier(**grid_search.best_params_,verbose=-1, objective='multi:softmax', subsample=0.5, eval_metric="mlogloss")
+# best_model.fit(X_train, y_train)
+evals_result = {}  # Initialize an empty dictionary to store training history
+best_model.fit(
+    X_train,
+    y_train,
+    eval_set=[(X_train, y_train), (X_test, y_test)],
+    eval_metric="mlogloss",  # Set the evaluation metric for learning curves
+    verbose=True,
+    evals_result=evals_result  # Capture training history
+)
 best_model.get_params()
 
 # Make predictions on the test set
@@ -47,8 +57,17 @@ y_pred = best_model.predict(X_test)
 y_pred_train = best_model.predict(X_train)
 
 
-# Evaluate the model
-# test_accuracy = accuracy_score(y_test, y_pred)
-train_accuracy = accuracy_score(y_train, y_pred_train)
-# print(f'Test Accuracy with best hyperparameters: {test_accuracy}')
-print(f'Training Accuracy with best hyperparameters: {train_accuracy}')
+# Get training history
+train_metric = evals_result['validation_0']['mlogloss']
+valid_metric = evals_result['validation_1']['mlogloss']
+
+# Plot the learning curves
+plt.figure(figsize=(10, 6))
+iterations = np.arange(1, len(train_metric) + 1)
+plt.plot(iterations, train_metric, label='Training Multi Log Loss')
+plt.plot(iterations, valid_metric, label='Validation Multi Log Loss')
+plt.title('Learning Curves')
+plt.xlabel('Iterations')
+plt.ylabel('Multi Log Loss')
+plt.legend()
+plt.show()
