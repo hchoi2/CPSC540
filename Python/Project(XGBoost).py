@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, classification_report
 import xgboost as xgb
 from sklearn.model_selection import learning_curve
+from sklearn.metrics import f1_score, recall_score, precision_score
 
 # Load data
 data = pd.read_csv('./python/WineQT.csv')
@@ -71,3 +72,7 @@ plt.xlabel('Iterations')
 plt.ylabel('Multi Log Loss')
 plt.legend()
 plt.show()
+
+f1=f1_score(y_test, y_pred, average='micro') #Use 'macro' and 'weighted' for average too
+precision=precision_score(y_test, y_pred, average='micro') #Use 'macro' and 'weighted' for average too
+recall=recall_score(y_test, y_pred, average='micro') #Use 'macro' and 'weighted' for average too
