@@ -13,7 +13,7 @@ from sklearn.metrics import f1_score, recall_score, precision_score
 
 def Light_wrapper(X, y):
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=32)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # X_train,y_train=sm.fit_resample(X_train,y_train) --- 62 % accuracy, it's worse
 
