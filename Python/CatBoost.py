@@ -4,18 +4,27 @@ import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
-from catboost import CatBoostClassifier as cbr
+import catboost as cat
 import shap
 
 # Load data
 data = pd.read_csv('./Data/WineQT.csv')
 X = data.iloc[:, 0:11]
-y = data.iloc[:, 11] 
-print(y.head())
+y = data.iloc[:, 11]
+print("Label Counts:")
+print(y.value_counts())
+
+# Print the label counts
+data.info()
+
+
 
 # Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=58)
+print("Label Train Counts:")
+print(y_train.value_counts())
+print("Label Test Counts:")
+print(y_test.value_counts())
 
 ## Baseline Model
 # Determine the most frequent class in the training set
@@ -30,29 +39,27 @@ baseline_error = 1 - baseline_accuracy
 print(f'Baseline Accuracy: {baseline_accuracy}')
 print(f'Baseline Error Rate: {baseline_error}')
 
-# Normalize the data
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)  # Note: we transform the test set with the parameters learned from the training set
+X_train_scaled = X_train
+X_test_scaled = X_test
 
 # Define the parameter grid to search
 param_grid = {
-    # 'grow_policy': 'Lossguide', 
-    # 'num_leaves': [20, 40, 60, 80, 100],
+    # 'grow_policy': 'Lossguide',
+    # 'num_leaves': [20],
     # 'iterations': [50, 100, 200, 300], # num_trees
     # 'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.2],
     # 'max_depth': [4, 6, 8, 10, 12],
     # 'l2_leaf_reg': [0.001, 0.01, 0.1, 1, 10]
-    'iterations': [100], # num_trees
-    'learning_rate': [0.1],
-    'max_depth': [8],
-    'l2_leaf_reg': [0.01]
-
+    'iterations': [200], # num_trees
+    'learning_rate': [0.2],
+    'max_depth': [4],
+    'l2_leaf_reg': [0.01],
+    'early_stopping_rounds': [20],
 }
 
 
 # Create the CatBoost model
-cbr_model = cbr(verbose=0, objective='MultiClass')
+cbr_model = cat.CatBoostClassifier(verbose=0, objective='MultiClass')
 
 # Use GridSearchCV to find the best hyperparameters
 grid_search = GridSearchCV(estimator=cbr_model, param_grid=param_grid, scoring='accuracy', cv=3, verbose=3)
@@ -66,12 +73,10 @@ best_score = grid_search.best_score_
 print(f'Average Cross-Validation Score: {best_score}')
 
 # Train a new model with the best hyperparameters
-best_params = grid_search.best_params_.copy()
-best_params.update({'verbose': 0, 'objective': 'MultiClass'}) 
-best_model = cbr(**best_params)
-# best_model = cbr(**grid_search.best_params_, verbose=0, objective='MultiClass')
-best_model.fit(X_train_scaled, y_train, eval_set=(X_test_scaled, y_test), early_stopping_rounds=20) # avoid overfitting
+best_model = cat.CatBoostClassifier(**grid_search.best_params_, objective='MultiClass')
 print(best_model.get_params())
+best_model.fit(X_train_scaled, y_train, eval_set=(X_test_scaled, y_test), early_stopping_rounds=20) # avoid overfitting
+
 # Make predictions on the test set
 y_pred = best_model.predict(X_test_scaled)
 y_pred_train = best_model.predict(X_train_scaled)
@@ -110,7 +115,9 @@ plt.plot(eval_history['learn']['MultiClass'], label='Training loss')
 plt.plot(eval_history['validation']['MultiClass'], label='Validation loss')
 plt.title('Learning Curve')
 plt.xlabel('Iterations')
+plt.xlim(-5, 100)
 plt.ylabel('MultiClass Loss')
+plt.ylim(0 ,2)
 plt.legend()
 plt.show()
 plt.savefig('learning_curve.png')

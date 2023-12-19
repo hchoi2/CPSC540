@@ -6,9 +6,10 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, classification_report
 import xgboost as xgb
 from sklearn.model_selection import learning_curve
+from sklearn.metrics import f1_score, recall_score, precision_score
 
 # Load data
-data = pd.read_csv('./python/WineQT.csv')
+data = pd.read_csv('./WineQT.csv')
 X = data.iloc[:, 0:11]
 y = data.iloc[:, 11] 
 y=LabelEncoder().fit_transform(y)
@@ -20,17 +21,17 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Define the parameter grid to search
 param_grid = {
-    'max_depth': [4, 6, 8],
-    'n_estimators': [50, 100, 200],
-    'eta' : [0.01, 0.1, 0.2],
-    'lambda' : [0.1, 1, 10]
+    'max_depth': [4],
+    'n_estimators': [50],
+    'eta' : [0.01],
+    'lambda' : [0.1]
 }
 
 # Create the XGBoost model
 xgb_model = xgb.XGBClassifier(objective='multi:softmax', subsample=0.5)
 
 # Use GridSearchCV to find the best hyperparameters
-grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, scoring='accuracy', cv=5, verbose=3)
+grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, scoring='accuracy', cv=2, verbose=3)
 grid_search.fit(X_train, y_train)
 best_score = grid_search.best_score_
 print(f'Average Cross-Validation Score: {best_score}')
@@ -39,15 +40,15 @@ print(f'Average Cross-Validation Score: {best_score}')
 print("Best Hyperparameters:", grid_search.best_params_)
 
 # Train a new model with the best hyperparameters
-best_model = xgb.XGBClassifier(**grid_search.best_params_,verbose=-1, objective='multi:softmax', subsample=0.5)
+best_model = xgb.XGBClassifier(**grid_search.best_params_, objective='multi:softmax', subsample=0.5)
+print(best_model.get_params())
 # best_model.fit(X_train, y_train)
 evals_result = {}  # Initialize an empty dictionary to store training history
 best_model.fit(
     X_train,
     y_train,
     eval_set=[(X_train, y_train), (X_test, y_test)],
-    eval_metric="mlogloss",  # Set the evaluation metric for learning curves
-    verbose=True,
+    #eval_metric="mlogloss",  # Set the evaluation metric for learning curves
 )
 best_model.get_params()
 
@@ -71,3 +72,12 @@ plt.xlabel('Iterations')
 plt.ylabel('Multi Log Loss')
 plt.legend()
 plt.show()
+
+
+
+f1=f1_score(y_test, y_pred, average='micro') #Use 'macro' and 'weighted' for average too
+precision=precision_score(y_test, y_pred, average='micro') #Use 'macro' and 'weighted' for average too
+recall=recall_score(y_test, y_pred, average='micro') #Use 'macro' and 'weighted' for average too
+print("F1:", f1)
+print("precision:", precision)
+print("recall:", recall)
