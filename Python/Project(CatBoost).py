@@ -43,10 +43,10 @@ param_grid = {
     # 'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.2],
     # 'max_depth': [4, 6, 8, 10, 12],
     # 'l2_leaf_reg': [0.001, 0.01, 0.1, 1, 10]
-    'iterations': [100, 300], # num_trees
-    'learning_rate': [0.1, 0.2],
-    'max_depth': [8, 12],
-    'l2_leaf_reg': [0.001, 0.01]
+    'iterations': [100], # num_trees
+    'learning_rate': [0.1],
+    'max_depth': [8],
+    'l2_leaf_reg': [0.01]
 
 }
 
@@ -71,7 +71,7 @@ best_params.update({'verbose': 0, 'objective': 'MultiClass'})
 best_model = cbr(**best_params)
 # best_model = cbr(**grid_search.best_params_, verbose=0, objective='MultiClass')
 best_model.fit(X_train_scaled, y_train, eval_set=(X_test_scaled, y_test), early_stopping_rounds=20) # avoid overfitting
-
+print(best_model.get_params())
 # Make predictions on the test set
 y_pred = best_model.predict(X_test_scaled)
 y_pred_train = best_model.predict(X_train_scaled)
