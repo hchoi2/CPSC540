@@ -2,12 +2,23 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, ParameterGrid
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.metrics import f1_score, classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
 import catboost as cat
+import xgboost as xgb
+import lightgbm as lgb
 import shap
+
+
+def custom_f1_score(y_true, preds):
+    y_pred = np.argmax(preds, axis=1)
+    f1 = f1_score(y_true, y_pred, average='micro')  # 'micro' or 'macro' depending on your preference
+    return 'f1_score', f1, True  # The last element True indicates that higher values are better
+
+
 
 # Load data
 data = pd.read_csv('./Data/WineQT.csv')
@@ -15,16 +26,19 @@ X = data.iloc[:, 0:11]
 y = data.iloc[:, 11]
 print("Label Counts:")
 print(y.value_counts())
+#y=LabelEncoder().fit_transform(y)
+y= pd.Series(LabelEncoder().fit_transform(y))
+
 
 # Print the label counts
 data.info()
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=58)
-print("Label Train Counts:")
-print(y_train.value_counts())
-print("Label Test Counts:")
-print(y_test.value_counts())
+# print("Label Train Counts:")
+# print(y_train.value_counts())
+# print("Label Test Counts:")
+# print(y_test.value_counts())
 
 # Baseline Model
 most_frequent_class = y_train.mode()[0]
@@ -39,15 +53,12 @@ X_train_scaled = X_train
 X_test_scaled = X_test
 
 param_grid = {
-    'iterations': [400],
-    'learning_rate': [0.2],
-    'max_depth': [3,4,5],
-    'l2_leaf_reg': [0.1],
-    'early_stopping_rounds': [350],
-    'eval_metric' : ['TotalF1'],
+    'learning_rate': [0.02], #default [0.1]  [0.025,0.05,0.1,0.2,0.3]
+    'max_depth': [100],   #default [-1]
+    'num_leaves': [5,10,20] ,  #default [31]  [3,7,15,31,127,1024]
+    'feature_fraction_bynode': [1], #default [1] [log2,sqrt,0.25,1.0]
 }
 
-#cbr_model = cat.CatBoostClassifier(verbose=0, objective='MultiClass')
 
 # Use StratifiedKFold for cross-validation
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=32)
@@ -63,8 +74,8 @@ for params in ParameterGrid(param_grid):
     print("Testing hyperparameters:", params)
 
     # Create the CatBoost model with current hyperparameters
-    cbr_model = cat.CatBoostClassifier(verbose=0, objective='MultiClass')
-    cbr_model.set_params(**params)
+    trainModel = lgb.LGBMClassifier(verbose=-1,objective='MultiClass', n_estimators= 400)
+    trainModel.set_params(**params)
 
     # Lists to store raw losses for each fold
     fold_train_losses = []
@@ -78,18 +89,18 @@ for params in ParameterGrid(param_grid):
         y_train_fold, y_val_fold = y_train.iloc[train_index], y_train.iloc[val_index]
 
 
-        # Fit the model
-        cbr_model.fit(X_train_fold, y_train_fold, eval_set=(X_val_fold, y_val_fold), verbose=0)
-        plt.show()
+        # Fit the model[(X_train, y_train), (X_test, y_test)]
+        trainModel.fit(X_train_fold, y_train_fold, eval_set=[(X_train_fold, y_train_fold),(X_val_fold, y_val_fold)],eval_metric=custom_f1_score)
 
         # Get the evaluation history for the current fold
-        eval_history = cbr_model.evals_result_
+        eval_history = trainModel.evals_result_
 
         # Collect training and validation losses for each iteration
-        fold_train_losses.append(eval_history['learn']['MultiClass'])
-        fold_val_losses.append(eval_history['validation']['MultiClass'])
-        fold_train_f1.append(eval_history['learn']['TotalF1'])
-        fold_val_f1.append(eval_history['validation']['TotalF1'])
+        fold_train_losses.append(eval_history['training']['multi_logloss'])
+        fold_val_losses.append(eval_history['valid_1']['multi_logloss'])
+        fold_train_f1.append(eval_history['training']['f1_score'])
+        fold_val_f1.append(eval_history['valid_1']['f1_score'])
+
 
     # Interpolate to have the same length
     min_len = min(len(history) for history in fold_train_losses)
@@ -114,8 +125,8 @@ for params in ParameterGrid(param_grid):
 avg_train_losses= [np.mean(np.array(sublist), axis=0) for sublist in train_losses]
 avg_val_losses= [np.mean(np.array(sublist), axis=0) for sublist in val_losses]
 
-avg_train_f1= [np.mean(np.array(sublist), axis=0) for sublist in train_f1]
-avg_val_f1= [np.mean(np.array(sublist), axis=0) for sublist in val_f1]
+avg_train_f1 = [np.mean(np.array(sublist), axis=0) for sublist in train_f1]
+avg_val_f1 = [np.mean(np.array(sublist), axis=0) for sublist in val_f1]
 
 
 # Plot the learning curves losses for each set of hyperparameters
@@ -124,26 +135,25 @@ for i, params in enumerate(ParameterGrid(param_grid)):
     plt.plot(avg_train_losses[i], label=f'Training Loss - {params}')
     plt.plot(avg_val_losses[i], label=f'Validation Loss - {params}')
 
-plt.title('Learning Curves for Different Hyperparameter Combinations')
+plt.title('Learning Curves for Different Hyperparameter Combinations : LIGHTGBM')
 plt.xlabel('Iterations')
 plt.ylabel('MultiClass Loss')
 plt.legend()
-plt.show()
-
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
-plt.savefig(f"learning_curves_loss_{timestamp_str}.png")
+plt.savefig(f"LGB_learning_curves_loss_{timestamp_str}.png")
+plt.show()
 # Plot the learning curves F1 for each set of hyperparameters
 plt.figure(figsize=(14, 10))
 for i, params in enumerate(ParameterGrid(param_grid)):
     plt.plot(avg_train_f1[i], label=f'Training Loss - {params}')
     plt.plot(avg_val_f1[i], label=f'Validation Loss - {params}')
 
-plt.title('Learning Curves for Different Hyperparameter Combinations')
+plt.title('Learning Curves for Different Hyperparameter Combinations : LIGHTGBM')
 plt.xlabel('Iterations')
 plt.ylabel('F1')
 plt.legend()
-plt.show()
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
-plt.savefig(f"learning_curves_f1_{timestamp_str}.png")
+plt.savefig(f"LGB_learning_curves_f1_{timestamp_str}.png")
+plt.show()
