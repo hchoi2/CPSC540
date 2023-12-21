@@ -43,7 +43,7 @@ lgb_model = lgb.LGBMClassifier(verbose=-1,objective='multiclass', metric='multi_
 grid_search = GridSearchCV(lgb_model, param_grid, cv=cv, scoring='f1_weighted', verbose=3)
 
 # Add early stopping callback
-callbacks = [lgb.early_stopping(20)]
+callbacks = [lgb.early_stopping(75)]
 
 grid_search.fit(X_train, y_train, eval_set=[(X_test, y_test)], callbacks=callbacks)
 
@@ -59,4 +59,4 @@ print("\nResults Table:")
 print(results_table)
 
 # Save the results table to a CSV file
-results_table.to_csv('grid_search_results_LGBM.csv', index=False)
+results_table.to_csv('grid_search_results_LGBM_75.csv', index=False)
