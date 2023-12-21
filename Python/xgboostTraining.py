@@ -53,15 +53,20 @@ print(f'Baseline Error Rate: {baseline_error}')
 X_train_scaled = X_train
 X_test_scaled = X_test
 
-param_grid = {
-    'learning_rate': [0.1], #default [0.1]  [0.025 , 0.05 , 0.1 , 0.2 , 0.3]
-    'max_depth': [3,4,5], #default [3]  [2, 3, 5, 7, 10, 100]
-    'gamma': [0],  #default [0]   [0,0.1,0.2,0.3,0.4,1.0,1.5,2.0]
-    'colsample_bylevel':[1],  #default [1]  [log2,sqrt , 0.25, 1.0]
-    'subsample':[1],  #default [1]  [0.15 , 0.5 , 0.75 , 1.0]
-    #'min_child_weight':[1],
-}
+# param_grid = {
+#     'learning_rate': [0.1], #default [0.1]  [0.025 , 0.05 , 0.1 , 0.2 , 0.3]
+#     'max_depth': [3,4,5], #default [3]  [2, 3, 5, 7, 10, 100]
+#     'gamma': [0],  #default [0]   [0,0.1,0.2,0.3,0.4,1.0,1.5,2.0]
+#     'colsample_bylevel':[1],  #default [1]  [log2,sqrt , 0.25, 1.0]
+#     'subsample':[1],  #default [1]  [0.15 , 0.5 , 0.75 , 1.0]
+#     #'min_child_weight':[1],
+# }
 
+param_grid = [
+    {'learning_rate': [0.1], 'max_depth': [3], 'gamma': [0], 'colsample_bylevel': [1], 'subsample': [1]},
+    {'learning_rate': [0.2], 'max_depth': [4], 'gamma': [0.1], 'colsample_bylevel': [0.8], 'subsample': [0.9]},
+    {'learning_rate': [0.05], 'max_depth': [5], 'gamma': [0.2], 'colsample_bylevel': [0.6], 'subsample': [0.8]}
+]
 #cbr_model = cat.CatBoostClassifier(verbose=0, objective='MultiClass')
 
 # Use StratifiedKFold for cross-validation

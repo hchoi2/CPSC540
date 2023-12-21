@@ -43,8 +43,8 @@ X_test_scaled = X_test
 
 param_grid = {
     'learning_rate': [0.1],  #default [Var.] [0.025,0.05,0.1,0.2,0.3]
-    'max_depth': [3,4,5],   #defalut [6]   [3,6,9]
-    'l2_leaf_reg': [0.1],  #default [3]   [1,3,6,9]
+    'max_depth': [3,6,9],   #defalut [6]   [3,6,9]
+    'l2_leaf_reg': [1,3,6,9],  #default [3]   [1,3,6,9]
     #'leaf_estimation_iterations' : [],
 }
 
@@ -78,10 +78,8 @@ for params in ParameterGrid(param_grid):
         X_train_fold, X_val_fold = X_train_scaled.iloc[train_index], X_train_scaled.iloc[val_index]
         y_train_fold, y_val_fold = y_train.iloc[train_index], y_train.iloc[val_index]
 
-
         # Fit the model
-        trainModel.fit(X_train_fold, y_train_fold, eval_set=(X_val_fold, y_val_fold), verbose=0)
-        plt.show()
+        trainModel.fit(X_train_fold, y_train_fold, eval_set=(X_val_fold, y_val_fold), early_stopping_rounds= 50, verbose=0)
 
         # Get the evaluation history for the current fold
         eval_history = trainModel.evals_result_
@@ -100,6 +98,7 @@ for params in ParameterGrid(param_grid):
     min_len = min(len(history) for history in fold_train_f1)
     fold_train_f1 = [np.interp(range(min_len), range(len(history)), history) for history in fold_train_f1]
     fold_val_f1 = [np.interp(range(min_len), range(len(history)), history) for history in fold_val_f1]
+
 
     # Append raw losses to the overall lists
     train_losses.append(fold_train_losses)
