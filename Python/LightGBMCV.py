@@ -29,7 +29,7 @@ print(y_test.value_counts())
 param_grid = {
     'learning_rate': [0.05,0.1],
     'max_depth': [-1],
-    'num_leaves': [3, 7, 12, 35, 50, 70],
+    'num_leaves': [3, 7, 12, 35, 50],
     'feature_fraction_bynode': [0.1, 0.25, 0.5, 1.0], #0.31, 0.3,
 }
 
@@ -59,4 +59,4 @@ print("\nResults Table:")
 print(results_table)
 
 # Save the results table to a CSV file
-results_table.to_csv('grid_search_results_LGBM_25.csv', index=False)
+results_table.to_csv('grid_search_results_LGBM_25b.csv', index=False)
