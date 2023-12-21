@@ -53,14 +53,14 @@ print(f'Baseline Error Rate: {baseline_error}')
 X_train_scaled = X_train
 X_test_scaled = X_test
 
-# param_grid = {
-#     'learning_rate': [0.1], #default [0.1]  [0.025 , 0.05 , 0.1 , 0.2 , 0.3]
-#     'max_depth': [3,4,5], #default [3]  [2, 3, 5, 7, 10, 100]
-#     'gamma': [0],  #default [0]   [0,0.1,0.2,0.3,0.4,1.0,1.5,2.0]
-#     'colsample_bylevel':[1],  #default [1]  [log2,sqrt , 0.25, 1.0]
-#     'subsample':[1],  #default [1]  [0.15 , 0.5 , 0.75 , 1.0]
-#     #'min_child_weight':[1],
-# }
+param_grid = {
+    'learning_rate': [0.025 , 0.05 , 0.1 , 0.2], #default [0.1]  [0.025 , 0.05 , 0.1 , 0.2 , 0.3]
+    #'max_depth': [3,4,5], #default [3]  [2, 3, 5, 7, 10, 100]
+    #'gamma': [0],  #default [0]   [0,0.1,0.2,0.3,0.4,1.0,1.5,2.0]
+    #'colsample_bylevel':[1],  #default [1]  [log2,sqrt , 0.25, 1.0]
+    #'subsample':[1],  #default [1]  [0.15 , 0.5 , 0.75 , 1.0]
+    #'min_child_weight':[1],
+}
 
 # param_grid = [
 #     {'learning_rate': [0.1], 'max_depth': [3], 'gamma': [0], 'colsample_bylevel': [1], 'subsample': [1]},
@@ -139,30 +139,31 @@ avg_val_f1 = [np.mean(np.array(sublist), axis=0) for sublist in val_f1]
 
 
 # Plot the learning curves losses for each set of hyperparameters
-plt.figure(figsize=(14, 10))
+plt.figure(figsize=(8, 6))
 for i, params in enumerate(ParameterGrid(param_grid)):
-    plt.plot(avg_train_losses[i], label=f'Training Loss - {params}')
-    plt.plot(avg_val_losses[i], label=f'Validation Loss - {params}')
+    plt.plot(avg_train_losses[i], label=f'Train_Loss - {params}')
+    plt.plot(avg_val_losses[i], label=f'Val_Loss - {params}')
 
-plt.title('Learning Curves for Different Hyperparameter Combinations : XGBOOST')
+plt.title('Learning Curves: XGBoost')
 plt.xlabel('Iterations')
 plt.ylabel('MultiClass Loss')
 plt.legend()
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
-plt.savefig(f"XG_learning_curves_loss_{timestamp_str}.png")
+plt.savefig(f"LGB_learning_curves_loss_{timestamp_str}.png")
 plt.show()
 # Plot the learning curves F1 for each set of hyperparameters
-plt.figure(figsize=(14, 10))
+plt.figure(figsize=(8, 6))
 for i, params in enumerate(ParameterGrid(param_grid)):
-    plt.plot(avg_train_f1[i], label=f'Training Loss - {params}')
-    plt.plot(avg_val_f1[i], label=f'Validation Loss - {params}')
+    plt.plot(avg_train_f1[i], label=f'Train_Loss - {params}')
+    plt.plot(avg_val_f1[i], label=f'Val_Loss - {params}')
 
-plt.title('Learning Curves for Different Hyperparameter Combinations : XGBOOST')
+plt.title('Learning Curves: XGBoost')
 plt.xlabel('Iterations')
 plt.ylabel('F1')
 plt.legend()
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
-plt.savefig(f"XG_learning_curves_f1_{timestamp_str}.png")
+plt.savefig(f"LGB_learning_curves_f1_{timestamp_str}.png")
 plt.show()
+

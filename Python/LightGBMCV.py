@@ -27,10 +27,10 @@ print(y_test.value_counts())
 
 # Define the parameter grid for LightGBM
 param_grid = {
-    'learning_rate': [0.025, 0.05, 0.1, 0.2, 0.3],
+    'learning_rate': [0.05,0.1],
     'max_depth': [-1],
-    'num_leaves': [3, 7, 15, 31, 127, 1024],
-    'feature_fraction_bynode': [ 0.25, 1.0], #0.31, 0.3,
+    'num_leaves': [3, 7, 12, 35, 50, 70],
+    'feature_fraction_bynode': [0.1, 0.25, 0.5, 1.0], #0.31, 0.3,
 }
 
 # Use StratifiedKFold for cross-validation
@@ -43,7 +43,7 @@ lgb_model = lgb.LGBMClassifier(verbose=-1,objective='multiclass', metric='multi_
 grid_search = GridSearchCV(lgb_model, param_grid, cv=cv, scoring='f1_weighted', verbose=3)
 
 # Add early stopping callback
-callbacks = [lgb.early_stopping(75)]
+callbacks = [lgb.early_stopping(25)]
 
 grid_search.fit(X_train, y_train, eval_set=[(X_test, y_test)], callbacks=callbacks)
 
@@ -59,4 +59,4 @@ print("\nResults Table:")
 print(results_table)
 
 # Save the results table to a CSV file
-results_table.to_csv('grid_search_results_LGBM_75.csv', index=False)
+results_table.to_csv('grid_search_results_LGBM_25.csv', index=False)
