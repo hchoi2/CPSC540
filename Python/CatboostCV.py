@@ -8,7 +8,7 @@ from sklearn.metrics import f1_score
 import catboost as cat
 
 # Load data
-data = pd.read_csv('./Data/WineQT.csv')
+data = pd.read_csv('./Python/WineQT.csv')
 X = data.iloc[:, 0:11]
 y = data.iloc[:, 11]
 print("Label Counts:")

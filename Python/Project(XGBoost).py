@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold
 from sklearn.metrics import accuracy_score, classification_report
 import xgboost as xgb
 from sklearn.model_selection import learning_curve
@@ -24,63 +24,68 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # Define the parameter grid to search
 param_grid = {
     # 'learning_rate': [0.025, 0.05, 0.1, 0.2, 0.3],
-    'learning_rate': [0.025, 0.05],
-    # 'gamma': [0, 0.1, 0.2, 0.3, 0.4, 1, 1.5, 2],
-    'gamma': [1, 1.5, 2],
-    # 'max_depth': [2, 3, 5, 7, 10, 100],
-    'max_depth': [2, 3, 5]
-    # 'colsample_bylevel': [math.log2,math.sqrt, 0.25, 1],
-    # 'subsample':[0.15, 0.5, 0.75, 1]
+    'learning_rate': [0.1],
+    'gamma': [0, 0.1, 0.2, 0.3, 0.4, 1, 1.5, 2],
+    # 'gamma': [1, 1.5, 2],
+    'max_depth': [2, 3, 5, 7, 10, 100],
+    # 'max_depth': [2, 3, 5]
+    'colsample_bylevel': [math.log2,math.sqrt, 0.25, 1],
+    'subsample':[0.15, 0.5, 0.75, 1]
     # 'n_estimators': [50],
     # 'eta' : [0.01],
     # 'lambda' : [0.1]
 }
 
 # Create the XGBoost model
-xgb_model = xgb.XGBClassifier(objective='multi:softmax', )
+xgb_model = xgb.XGBClassifier(objective='multi:softmax')
+callbacks=[xgb.early_stoppings(40)]
 
 # Use GridSearchCV to find the best hyperparameters
-grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, scoring='f1_weighted', cv=5, verbose=3)
-grid_search.fit(X_train, y_train, early_stopping_rounds=200)
+grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, scoring='f1_weighted', cv= StratifiedKFold(n_splits=5, shuffle=True, random_state=32), verbose=3)
+grid_search.fit(X_train, y_train, verbose=True, callbacks=callbacks)
 best_score = grid_search.best_score_
 print(f'Average Cross-Validation Score: {best_score}')
 
 # Print the best hyperparameters
 print("Best Hyperparameters:", grid_search.best_params_)
 
+# Display the table of results
+results = pd.DataFrame(grid_search.cv_results_)
+columns_of_interest = ['param_learning_rate', 'param_max_depth', 'param_l2_leaf_reg','param_leaf_estimation_iterations', 'mean_test_score', 'std_test_score']
+results_table = results[columns_of_interest].sort_values(by='mean_test_score', ascending=False)
+print("\nResults Table:")
+print(results_table)
+# Save the results table to a CSV file
+results_table.to_csv('grid_search_results_XGB.csv', index=False)
+
 # Train a new model with the best hyperparameters
-best_model = xgb.XGBClassifier(**grid_search.best_params_, objective='multi:softmax')
-print(best_model.get_params())
-# best_model.fit(X_train, y_train)
-evals_result = {}  # Initialize an empty dictionary to store training history
-best_model.fit(
-    X_train,
-    y_train,
-    eval_set=[(X_train, y_train), (X_test, y_test)],
-    #eval_metric="mlogloss",  # Set the evaluation metric for learning curves
-)
-best_model.get_params()
+# best_model = xgb.XGBClassifier(**grid_search.best_params_, objective='multi:softmax')
+# print(best_model.get_params())
+# # best_model.fit(X_train, y_train)
+# evals_result = {}  # Initialize an empty dictionary to store training history
+# best_model.fit(
+#     X_train,
+#     y_train,
+#     eval_set=[(X_train, y_train), (X_test, y_test)],
+#     #eval_metric="mlogloss",  # Set the evaluation metric for learning curves
+# )
+# best_model.get_params()
 
 # Make predictions on the test set
-y_pred = best_model.predict(X_test)
-y_pred_train = best_model.predict(X_train)
+# y_pred = best_model.predict(X_test)
+# y_pred_train = best_model.predict(X_train)
 
-# Get the ranked results
-results_df = pd.DataFrame(grid_search.cv_results_)
-ranked_results = results_df[['params', 'mean_test_score']].sort_values(by='mean_test_score', ascending=False)
-print("\nRanked Results based on F1 Score:")
-print(ranked_results)
 
 # Extract relevant columns for the heatmap
-heatmap_data = results_df.pivot(index='param_learning_rate', columns='param_max_depth', values='mean_test_score')
+# heatmap_data = results_df.pivot(index='param_learning_rate', columns='param_max_depth', values='mean_test_score')
 
 # Plot the heatmap
-plt.figure(figsize=(10, 6))
-sns.heatmap(heatmap_data, annot=True, cmap='viridis', fmt=".3f", cbar_kws={'label': 'Weighted F1 Score'})
-plt.title('GridSearchCV Results Heatmap')
-plt.xlabel('max_depth')
-plt.ylabel('n_estimators')
-plt.show()
+# plt.figure(figsize=(10, 6))
+# sns.heatmap(heatmap_data, annot=True, cmap='viridis', fmt=".3f", cbar_kws={'label': 'Weighted F1 Score'})
+# plt.title('GridSearchCV Results Heatmap')
+# plt.xlabel('max_depth')
+# plt.ylabel('n_estimators')
+# plt.show()
 
 
 # Get training history
