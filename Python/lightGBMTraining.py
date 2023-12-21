@@ -53,10 +53,10 @@ X_train_scaled = X_train
 X_test_scaled = X_test
 
 param_grid = {
-    'learning_rate': [0.02], #default [0.1]  [0.025,0.05,0.1,0.2,0.3]
-    'max_depth': [100],   #default [-1]
-    'num_leaves': [5,10,20] ,  #default [31]  [3,7,15,31,127,1024]
-    'feature_fraction_bynode': [1], #default [1] [log2,sqrt,0.25,1.0]
+    'learning_rate': [0.025,0.05,0.1,0.2], #default [0.1]  [0.025,0.05,0.1,0.2,0.3]
+    #'max_depth': [-1],   #default [-1]
+    #'num_leaves': [31] ,  #default [31]  [3,7,15,31,127,1024]
+    #'feature_fraction_bynode': [1], #default [1] [log2,sqrt,0.25,1.0]
 }
 
 
@@ -74,7 +74,7 @@ for params in ParameterGrid(param_grid):
     print("Testing hyperparameters:", params)
 
     # Create the CatBoost model with current hyperparameters
-    trainModel = lgb.LGBMClassifier(verbose=-1,objective='MultiClass', n_estimators= 400)
+    trainModel = lgb.LGBMClassifier(verbose=-1,objective='MultiClass', n_estimators= 150)
     trainModel.set_params(**params)
 
     # Lists to store raw losses for each fold
@@ -130,12 +130,12 @@ avg_val_f1 = [np.mean(np.array(sublist), axis=0) for sublist in val_f1]
 
 
 # Plot the learning curves losses for each set of hyperparameters
-plt.figure(figsize=(14, 10))
+plt.figure(figsize=(8, 6))
 for i, params in enumerate(ParameterGrid(param_grid)):
-    plt.plot(avg_train_losses[i], label=f'Training Loss - {params}')
-    plt.plot(avg_val_losses[i], label=f'Validation Loss - {params}')
+    plt.plot(avg_train_losses[i], label=f'Train_Loss - {params}')
+    plt.plot(avg_val_losses[i], label=f'Val_Loss - {params}')
 
-plt.title('Learning Curves for Different Hyperparameter Combinations : LIGHTGBM')
+plt.title('Learning Curves: LIGHTGBM')
 plt.xlabel('Iterations')
 plt.ylabel('MultiClass Loss')
 plt.legend()
@@ -144,12 +144,12 @@ timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
 plt.savefig(f"LGB_learning_curves_loss_{timestamp_str}.png")
 plt.show()
 # Plot the learning curves F1 for each set of hyperparameters
-plt.figure(figsize=(14, 10))
+plt.figure(figsize=(8, 6))
 for i, params in enumerate(ParameterGrid(param_grid)):
-    plt.plot(avg_train_f1[i], label=f'Training Loss - {params}')
-    plt.plot(avg_val_f1[i], label=f'Validation Loss - {params}')
+    plt.plot(avg_train_f1[i], label=f'Train_Loss - {params}')
+    plt.plot(avg_val_f1[i], label=f'Val_Loss - {params}')
 
-plt.title('Learning Curves for Different Hyperparameter Combinations : LIGHTGBM')
+plt.title('Learning Curves: LIGHTGBM')
 plt.xlabel('Iterations')
 plt.ylabel('F1')
 plt.legend()

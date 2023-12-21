@@ -62,11 +62,11 @@ X_test_scaled = X_test
 #     #'min_child_weight':[1],
 # }
 
-param_grid = [
-    {'learning_rate': [0.1], 'max_depth': [3], 'gamma': [0], 'colsample_bylevel': [1], 'subsample': [1]},
-    {'learning_rate': [0.2], 'max_depth': [4], 'gamma': [0.1], 'colsample_bylevel': [0.8], 'subsample': [0.9]},
-    {'learning_rate': [0.05], 'max_depth': [5], 'gamma': [0.2], 'colsample_bylevel': [0.6], 'subsample': [0.8]}
-]
+# param_grid = [
+#     {'learning_rate': [0.1], 'max_depth': [3], 'gamma': [0], 'colsample_bylevel': [1], 'subsample': [1]},
+#     {'learning_rate': [0.2], 'max_depth': [4], 'gamma': [0.1], 'colsample_bylevel': [0.8], 'subsample': [0.9]},
+#     {'learning_rate': [0.05], 'max_depth': [5], 'gamma': [0.2], 'colsample_bylevel': [0.6], 'subsample': [0.8]}
+# ]
 #cbr_model = cat.CatBoostClassifier(verbose=0, objective='MultiClass')
 
 # Use StratifiedKFold for cross-validation
