@@ -74,7 +74,7 @@ for params in ParameterGrid(param_grid):
     print("Testing hyperparameters:", params)
 
     # Create the CatBoost model with current hyperparameters
-    trainModel = lgb.LGBMClassifier(verbose=-1,objective='MultiClass', n_estimators= 150)
+    trainModel = lgb.LGBMClassifier(verbose=-1,objective='MultiClass', n_estimators= 175)
     trainModel.set_params(**params)
 
     # Lists to store raw losses for each fold

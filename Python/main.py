@@ -85,12 +85,17 @@ y=LabelEncoder().fit_transform(y)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=58)
 
 # Define models
-random_forest_model = RandomForestClassifier(n_estimators=150,max_depth=7,min_samples_split=5,min_samples_leaf=2, random_state=42)
-gbm_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=7, random_state=42)
-lgb_model = lgb.LGBMClassifier(learning_rate=0.1,  feature_fraction_bynode=0.25, num_leaves=50, random_state=42)
-catboost_model = catboost.CatBoostClassifier(iterations=100, learning_rate=0.1, depth=3, random_state=42, verbose=0)
-xgb_model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+# random_forest_model = RandomForestClassifier(n_estimators=150,max_depth=7,min_samples_split=5,min_samples_leaf=2, random_state=42)
+# gbm_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=7, random_state=42)
+# lgb_model = lgb.LGBMClassifier(learning_rate=0.1,  feature_fraction_bynode=0.25, num_leaves=50, random_state=42)
+# catboost_model = catboost.CatBoostClassifier(iterations=100, learning_rate=0.1, depth=3, random_state=42, verbose=0)
+# xgb_model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
 
+random_forest_model = RandomForestClassifier(random_state=42)
+gbm_model = GradientBoostingClassifier( random_state=42)
+lgb_model = lgb.LGBMClassifier(random_state=42)
+catboost_model = catboost.CatBoostClassifier(random_state=42)
+xgb_model = xgb.XGBClassifier(random_state=42)
 # Train models
 random_forest_model.fit(X_train, y_train)
 gbm_model.fit(X_train, y_train)
