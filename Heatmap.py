@@ -5,7 +5,7 @@ from matplotlib.colors import ListedColormap
 
 
 # Extract the results into a DataFrame
-results_df = pd.read_excel('LGBM_heat.xlsx')
+results_df = pd.read_excel('LGBM_heat_n.xlsx')
 
 # Extract relevant columns for the heatmap
 heatmap_data = results_df.pivot(index='param_num_leaves', columns='param_feature_fraction_bynode', values='mean_test_score')
