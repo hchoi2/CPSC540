@@ -82,15 +82,20 @@ X = data.iloc[:, 0:11]
 y = data.iloc[:, 11]
 y=LabelEncoder().fit_transform(y)
 # Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=58)
 
 # Define models
-random_forest_model = RandomForestClassifier(n_estimators=100, random_state=42)
-gbm_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
-lgb_model = lgb.LGBMClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
-catboost_model = catboost.CatBoostClassifier(iterations=100, learning_rate=0.1, depth=3, random_state=42, verbose=0)
-xgb_model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+# random_forest_model = RandomForestClassifier(n_estimators=150,max_depth=7,min_samples_split=5,min_samples_leaf=2, random_state=42)
+# gbm_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=7, random_state=42)
+# lgb_model = lgb.LGBMClassifier(learning_rate=0.1,  feature_fraction_bynode=0.25, num_leaves=50, random_state=42)
+# catboost_model = catboost.CatBoostClassifier(iterations=100, learning_rate=0.1, depth=3, random_state=42, verbose=0)
+# xgb_model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
 
+random_forest_model = RandomForestClassifier(random_state=42)
+gbm_model = GradientBoostingClassifier( random_state=42)
+lgb_model = lgb.LGBMClassifier(random_state=42)
+catboost_model = catboost.CatBoostClassifier(random_state=42)
+xgb_model = xgb.XGBClassifier(random_state=42)
 # Train models
 random_forest_model.fit(X_train, y_train)
 gbm_model.fit(X_train, y_train)
@@ -128,64 +133,3 @@ for model, preds in zip(models, predictions):
     plt.ylabel('Actual')
     plt.show()
 
-# Plot learning curves for each model
-for model, clf in zip(models, [random_forest_model, gbm_model, lgb_model, catboost_model, xgb_model]):
-    plt = plot_learning_curve(clf, f"Learning Curve - {model}", X_train, y_train)
-    plt.show()
-
-# Feature Importance Plots for Tree-based Models
-# Random Forest Feature Importance
-plot_feature_importance(random_forest_model.feature_importances_, X.columns, 'Random Forest')
-plt.show()
-
-# Gradient Boosting Feature Importance
-plot_feature_importance(gbm_model.feature_importances_, X.columns, 'GBM')
-plt.show()
-
-# LightGBM Feature Importance
-plot_feature_importance(lgb_model.feature_importances_, X.columns, 'LightGBM')
-plt.show()
-
-# CatBoost Feature Importance
-plot_feature_importance(catboost_model.feature_importances_, X.columns, 'CatBoost')
-plt.show()
-
-# XGBoost Feature Importance
-plot_feature_importance(xgb_model.feature_importances_, X.columns, 'XGBoost')
-plt.show()
-
-# Cross-validation results for each model
-for model, clf in zip(models, [random_forest_model, gbm_model, lgb_model, catboost_model, xgb_model]):
-    print_cross_val_results(clf, X, y)
-
-# Hyperparameter tuning for one model (Random Forest as an example)
-param_grid_rf = {
-    'n_estimators': [50, 100, 150],
-    'max_depth': [None, 10, 20],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4]
-}
-
-grid_search_rf = GridSearchCV(RandomForestClassifier(random_state=42), param_grid_rf, cv=5, scoring='accuracy',
-                              n_jobs=-1)
-grid_search_rf.fit(X_train, y_train)
-
-print("Best Parameters for Random Forest:", grid_search_rf.best_params_)
-print("Best Cross-Validation Accuracy:", grid_search_rf.best_score_)
-
-
-# Repeat hyperparameter tuning for other models as needed
-
-# Additional evaluation metrics
-def print_additional_metrics(y_true, y_pred):
-    # Add any other evaluation metrics you want to include
-    # For example, you might want to include top-k accuracy, log loss, etc.
-    pass
-
-
-# Use the above function for each model
-for model, preds in zip(models,
-                        [rf_predictions, gbm_predictions, lgb_predictions, catboost_predictions, xgb_predictions]):
-    print(f"--- Additional Metrics for {model} ---")
-    print_additional_metrics(y_test, preds)
-    print("\n")

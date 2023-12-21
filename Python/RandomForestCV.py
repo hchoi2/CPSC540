@@ -34,7 +34,7 @@ param_grid_rf = {
 }
 
 # Create the Random Forest model
-rf_model = RandomForestClassifier(random_state=42)
+rf_model = RandomForestClassifier(random_state=58)
 
 # Use StratifiedKFold for cross-validation
 cv_rf = StratifiedKFold(n_splits=5, shuffle=True, random_state=32)

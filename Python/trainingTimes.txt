@@ -1,0 +1,8 @@
+Training Time for RandomForestClassifier: 1.3469 seconds
+Training Time for GradientBoostingClassifier: 10.6109 seconds
+Training Time for LGBMClassifier: 2.239 seconds
+Training Time for CatBoostClassifier: 3.055 seconds
+Training Time for XGBClassifier: 5.4235 seconds
+
+
+
