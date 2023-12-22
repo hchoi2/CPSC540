@@ -130,7 +130,7 @@ avg_val_f1 = [np.mean(np.array(sublist), axis=0) for sublist in val_f1]
 
 
 # Plot the learning curves losses for each set of hyperparameters
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(5, 5))
 for i, params in enumerate(ParameterGrid(param_grid)):
     plt.plot(avg_train_losses[i], label=f'Train_Loss - {params}')
     plt.plot(avg_val_losses[i], label=f'Val_Loss - {params}')
@@ -138,13 +138,13 @@ for i, params in enumerate(ParameterGrid(param_grid)):
 plt.title('Learning Curves: LIGHTGBM')
 plt.xlabel('Iterations')
 plt.ylabel('MultiClass Loss')
-plt.legend()
+#plt.legend(loc='upper right')
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
 plt.savefig(f"LGB_learning_curves_loss_{timestamp_str}.png")
 plt.show()
 # Plot the learning curves F1 for each set of hyperparameters
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(5, 5))
 for i, params in enumerate(ParameterGrid(param_grid)):
     plt.plot(avg_train_f1[i], label=f'Train_Loss - {params}')
     plt.plot(avg_val_f1[i], label=f'Val_Loss - {params}')
@@ -152,7 +152,7 @@ for i, params in enumerate(ParameterGrid(param_grid)):
 plt.title('Learning Curves: LIGHTGBM')
 plt.xlabel('Iterations')
 plt.ylabel('F1')
-plt.legend()
+#plt.legend(loc='upper right')
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
 plt.savefig(f"LGB_learning_curves_f1_{timestamp_str}.png")

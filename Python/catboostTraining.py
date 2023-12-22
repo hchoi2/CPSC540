@@ -42,9 +42,9 @@ X_train_scaled = X_train
 X_test_scaled = X_test
 
 param_grid = {
-    'learning_rate': [0.1],  #default [Var.] [0.025,0.05,0.1,0.2,0.3]
-    'max_depth': [3,6,9],   #defalut [6]   [3,6,9]
-    'l2_leaf_reg': [1,3,6,9],  #default [3]   [1,3,6,9]
+    'learning_rate': [0.025,0.05,0.1,0.2],  #default [Var.] [0.025,0.05,0.1,0.2,0.3]
+    'max_depth': [6],   #defalut [6]   [3,6,9]
+    'l2_leaf_reg': [1],  #default [3]   [1,3,6,9]
     #'leaf_estimation_iterations' : [],
 }
 
@@ -79,7 +79,7 @@ for params in ParameterGrid(param_grid):
         y_train_fold, y_val_fold = y_train.iloc[train_index], y_train.iloc[val_index]
 
         # Fit the model
-        trainModel.fit(X_train_fold, y_train_fold, eval_set=(X_val_fold, y_val_fold), early_stopping_rounds= 50, verbose=0)
+        trainModel.fit(X_train_fold, y_train_fold, eval_set=(X_val_fold, y_val_fold), verbose=0)
 
         # Get the evaluation history for the current fold
         eval_history = trainModel.evals_result_
@@ -119,30 +119,61 @@ avg_val_f1= [np.mean(np.array(sublist), axis=0) for sublist in val_f1]
 
 
 # Plot the learning curves losses for each set of hyperparameters
-plt.figure(figsize=(14, 10))
-for i, params in enumerate(ParameterGrid(param_grid)):
-    plt.plot(avg_train_losses[i], label=f'Training Loss - {params}')
-    plt.plot(avg_val_losses[i], label=f'Validation Loss - {params}')
+# plt.figure(figsize=(14, 10))
+# for i, params in enumerate(ParameterGrid(param_grid)):
+#     plt.plot(avg_train_losses[i], label=f'Training Loss - {params}')
+#     plt.plot(avg_val_losses[i], label=f'Validation Loss - {params}')
+#
+# plt.title('Learning Curves for Different Hyperparameter Combinations : CATBOOST')
+# plt.xlabel('Iterations')
+# plt.ylabel('MultiClass Loss')
+# plt.legend()
+# current_timestamp = datetime.now()
+# timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
+# plt.savefig(f"Cat_learning_curves_loss_{timestamp_str}.png")
+# plt.show()
+# # Plot the learning curves F1 for each set of hyperparameters
+# plt.figure(figsize=(14, 10))
+# for i, params in enumerate(ParameterGrid(param_grid)):
+#     plt.plot(avg_train_f1[i], label=f'Training Loss - {params}')
+#     plt.plot(avg_val_f1[i], label=f'Validation Loss - {params}')
+#
+# plt.title('Learning Curves for Different Hyperparameter Combinations : CATBOOST')
+# plt.xlabel('Iterations')
+# plt.ylabel('F1')
+# plt.legend()
+# current_timestamp = datetime.now()
+# timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
+# plt.savefig(f"Cat_learning_curves_f1_{timestamp_str}.png")
+# plt.show()
 
-plt.title('Learning Curves for Different Hyperparameter Combinations : CATBOOST')
+
+# Plot the learning curves losses for each set of hyperparameters
+plt.figure(figsize=(5, 5))
+for i, params in enumerate(ParameterGrid(param_grid)):
+    plt.plot(avg_train_losses[i], label=f'Train_Loss - {params}')
+    plt.plot(avg_val_losses[i], label=f'Val_Loss - {params}')
+
+plt.title('Learning Curves: CATBoost')
 plt.xlabel('Iterations')
 plt.ylabel('MultiClass Loss')
-plt.legend()
+#plt.legend(loc='Lower right')
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
-plt.savefig(f"Cat_learning_curves_loss_{timestamp_str}.png")
+plt.savefig(f"CAT_learning_curves_loss_Final_{timestamp_str}.png")
 plt.show()
 # Plot the learning curves F1 for each set of hyperparameters
-plt.figure(figsize=(14, 10))
+plt.figure(figsize=(5, 5))
 for i, params in enumerate(ParameterGrid(param_grid)):
-    plt.plot(avg_train_f1[i], label=f'Training Loss - {params}')
-    plt.plot(avg_val_f1[i], label=f'Validation Loss - {params}')
+    plt.plot(avg_train_f1[i], label=f'Train_Loss - {params}')
+    plt.plot(avg_val_f1[i], label=f'Val_Loss - {params}')
 
-plt.title('Learning Curves for Different Hyperparameter Combinations : CATBOOST')
+plt.title('Learning Curves: CATBoost')
 plt.xlabel('Iterations')
 plt.ylabel('F1')
-plt.legend()
+#plt.legend(loc='Lower right')
 current_timestamp = datetime.now()
 timestamp_str = current_timestamp.strftime("%Y-%m-%d_%H-%M-%S")
-plt.savefig(f"Cat_learning_curves_f1_{timestamp_str}.png")
+plt.savefig(f"CAT_learning_curves_f1_Final_{timestamp_str}.png")
 plt.show()
+
